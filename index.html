@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Villanos - Solarpunk Metroidvania</title>
+    <style>
+        :root {
+            --bg-color: #0b1c14;
+            --glass-bg: rgba(20, 45, 30, 0.6);
+            --glass-border: rgba(90, 200, 140, 0.3);
+            --primary-color: #3ddc84;
+            --secondary-color: #f7d046;
+            --text-main: #e2f0e9;
+            --text-muted: #96b8a5;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b1c14 0%, #0a2e1f 50%, #0d3b36 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(61, 220, 132, 0.3);
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--primary-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        input, select {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .dice-btn {
+            background: var(--secondary-color);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 0 12px;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dice-btn:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+
+        /* Matrices / Morfología */
+        .matrix-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px dashed var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .matrix-result {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 10px 0;
+            min-height: 28px;
+        }
+
+        .btn-action {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-action:hover {
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        /* Prompt Section */
+        #prompt-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--primary-color);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--primary-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+
+        .register-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Creador de Villanos Solarpunk</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab1')">1. Info Básica</button>
+        <button class="tab-btn" onclick="openTab('tab2')">2. Atributos</button>
+        <button class="tab-btn" onclick="openTab('tab3')">3. Morfología</button>
+        <button class="tab-btn" onclick="openTab('tab4')">4. Atuendo</button>
+    </div>
+
+    <!-- TAB 1: INFO BÁSICA -->
+    <div id="tab1" class="tab-content active">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Nombre del Personaje</label>
+                <div class="input-group">
+                    <input type="text" id="nombre" placeholder="Ej. Sylas Thorn">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Género</label>
+                <div class="input-group">
+                    <select id="genero" onchange="checkInstitucion()">
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="No Binario">No Binario</option>
+                        <option value="Entidad Colectiva">Entidad Colectiva</option>
+                    </select>
+                    <button class="dice-btn" onclick="randomSelect('genero'); checkInstitucion()">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Raza</label>
+                <div class="input-group">
+                    <select id="raza"></select>
+                    <button class="dice-btn" onclick="randomSelect('raza')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Profesión</label>
+                <div class="input-group">
+                    <select id="profesion"></select>
+                    <button class="dice-btn" onclick="randomSelect('profesion')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Función Principal</label>
+                <div class="input-group">
+                    <select id="funcion_principal"></select>
+                    <button class="dice-btn" onclick="randomSelectFunc()">🎲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: ATRIBUTOS -->
+    <div id="tab2" class="tab-content">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Clase / Arquetipo</label>
+                <div class="input-group">
+                    <select id="clase"></select>
+                    <button class="dice-btn" onclick="randomSelect('clase')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Estatus Social/Jerárquico</label>
+                <div class="input-group">
+                    <select id="estatus"></select>
+                    <button class="dice-btn" onclick="randomSelect('estatus')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Rasgos</label>
+                <div class="input-group">
+                    <select id="rasgos"></select>
+                    <button class="dice-btn" onclick="randomSelect('rasgos')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Debilidades / Limitantes</label>
+                <div class="input-group">
+                    <select id="debilidades"></select>
+                    <button class="dice-btn" onclick="randomSelect('debilidades')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Habilidades</label>
+                <div class="input-group">
+                    <select id="habilidades"></select>
+                    <button class="dice-btn" onclick="randomSelect('habilidades')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Motivación / Deseo</label>
+                <div class="input-group">
+                    <select id="motivacion"></select>
+                    <button class="dice-btn" onclick="randomSelect('motivacion')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Comportamiento</label>
+                <div class="input-group">
+                    <select id="comportamiento"></select>
+                    <button class="dice-btn" onclick="randomSelect('comportamiento')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Hábitat</label>
+                <div class="input-group">
+                    <select id="habitat"></select>
+                    <button class="dice-btn" onclick="randomSelect('habitat')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Posición</label>
+                <div class="input-group">
+                    <select id="posicion"></select>
+                    <button class="dice-btn" onclick="randomSelect('posicion')">🎲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: MORFOLOGÍA -->
+    <div id="tab3" class="tab-content">
+        <p style="text-align:center; color: var(--text-muted);">Genera las fusiones morfológicas basadas en las matrices de Tsukamoto.</p>
+        
+        <div class="matrix-box">
+            <h3>Matriz 1: Tipo vs. Tipo (No se cruzan iguales)</h3>
+            <div class="matrix-result" id="res-tipo-tipo">--- combinada con ---</div>
+            <button class="btn-action" onclick="rollTipoVsTipo()">🎲 Elegir / Reelegir</button>
+        </div>
+
+        <div class="matrix-box">
+            <h3>Matriz 2: Tipo vs. Parte</h3>
+            <div class="matrix-result" id="res-tipo-parte">De --- tiene ---</div>
+            <button class="btn-action" onclick="rollTipoVsParte()">🎲 Elegir / Reelegir</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: ATUENDO -->
+    <div id="tab4" class="tab-content">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Vestimenta</label>
+                <div class="input-group">
+                    <select id="vestimenta"></select>
+                    <button class="dice-btn" onclick="randomSelect('vestimenta')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Cobertura / Calzado</label>
+                <div class="input-group">
+                    <select id="calzado"></select>
+                    <button class="dice-btn" onclick="randomSelect('calzado')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ornamento</label>
+                <div class="input-group">
+                    <select id="ornamento"></select>
+                    <button class="dice-btn" onclick="randomSelect('ornamento')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Maquillaje</label>
+                <div class="input-group">
+                    <select id="maquillaje"></select>
+                    <button class="dice-btn" onclick="randomSelect('maquillaje')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Envoltura</label>
+                <div class="input-group">
+                    <select id="envoltura"></select>
+                    <button class="dice-btn" onclick="randomSelect('envoltura')">🎲</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Objeto</label>
+                <div class="input-group">
+                    <select id="objeto"></select>
+                    <button class="dice-btn" onclick="randomSelect('objeto')">🎲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGISTRAR Y PROMPT -->
+    <div class="register-container">
+        <button class="btn-action" style="font-size: 1.2rem; padding: 15px 30px;" onclick="generarPrompt()">Registrar Entidad y Generar Prompt</button>
+    </div>
+
+    <div id="prompt-section">
+        <h2>Prompt Generado para IA</h2>
+        <p style="text-align:center; color: var(--text-muted);">Copia este texto y pégalo en tu generador de imágenes favorito (Midjourney, DALL-E, Stable Diffusion, etc.)</p>
+        <textarea id="prompt-output" readonly></textarea>
+        <div style="text-align: center;">
+            <button class="btn-action" onclick="copiarPrompt()">📋 Copiar al Portapapeles</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- DATOS Y LISTAS ---
+    const listas = {
+        raza: ["Humano", "Elfo", "Vampiro", "Hada", "Troll", "Ogro", "Golem", "Duende", "Habitante marino", "Beastmen", "Alien", "Hombres planta", "Zombie", "Angel", "Demonio"],
+        profesion: ["Minero espacial", "Músico", "Actor/Actriz", "Artista callejero", "Estafador", "Titiritero", "Medium", "Bailarín", "Cantante", "Pintor", "Inventor", "Profesor", "Estudiante", "Académico", "Médico", "Enfermero", "Abogado", "Juez", "Conductor", "Carpintero", "Cantinero", "Mesero/a", "Comerciante", "Panadero", "Florista", "Asesino", "Terrorista", "Soldado", "Programador", "Astronauta", "Piloto", "Ingeniero aeroespacial", "Samurái", "Policía", "Cazador", "Detective"],
+        funcion_principal: ["El Rival / Oponente espejo", "El Tentador / Corruptor", "El Traidor", "La Bestia / Monstruo interior", "La Sombra interna (el “yo oscuro”)", "La Institución opresora"],
+        clase: ["Explorador", "Guerrero", "Innovador", "Mago", "Brujo", "Hechicero", "Alquimista", "Bandido", "Picaro", "Bardo", "Curador", "Tanque", "Monje", "Arquero", "Tecno Bárbaro"],
+        estatus: ["Emperador", "Emperatriz", "Duque", "Duqueza", "Príncipe", "Princesa", "Caballero", "Caballero distinguido", "Dama", "Multimillonario", "Patriarca", "Matriarca", "CEO", "General del ejército", "Noble", "Esclavo", "Militar", "Mafioso", "Esclavista"],
+        rasgos: ["Avaricioso: Aumenta el 10% de oro obtenido", "Hueso Duro: STR +4", "Ágil: DEX+4", "Inteligente: INT +4", "Atractivo: CHA +4", "Saludable: CON +4", "Sabio: WIS +4", "Valiente: Aumenta 10% daño contra fuertes", "Cazador de débiles: Aumenta 10% daño contra débiles", "Innatamente Malvado: Alineamiento -20", "Innatamente Amable: Alineamiento +20", "Graduado en Magia: Usa magia sin objetos", "Salvaje: Rudo e instintivo", "Elegante: Elegante y llamativo", "Fornido: Bloquea sin escudo", "Desarrollo Tardío", "Desarrollo Precoz", "Apostador", "Cauteloso", "Fiel", "Ámbar (Fuego)", "Copo de nieve (Frío)", "Flor venenosa (Veneno)", "Chispa (Rayo)", "Melodía (Sónica)", "Mancha de Sangre", "Martillo", "Espada", "Flecha", "El Domador"],
+        debilidades: ["Alergia a la luz solar sin procesar", "Fobia al musgo cibernético", "Dependencia extrema a la red de energía local", "Lentitud de procesamiento en zonas húmedas", "Código de honor restrictivo que le impide mentir", "Articulaciones mecánicas propensas a la oxidación", "Susceptibilidad a los pulsos electromagnéticos (EMP)", "Corazón orgánico frágil y expuesto", "Necesidad de recarga cada 4 horas", "Arrogancia extrema: subestima a todos"],
+        habilidades: ["Volar", "Bucear", "Correr a gran velocidad", "Saltar", "Desplazamiento a alta velocidad", "Fuerza hercúlea", "Virulencia", "Imitación", "Petrificación", "Reflexión", "Absorción", "Transformación", "Posesión", "Deformación", "Alterar el ego", "Fisión", "Fusión", "Reproducción", "Recuperación", "Inmortalidad", "Regeneración", "Resurrección", "Aire caliente", "Aire frío", "Respirar o expulsar fuego", "Manipulación del viento/fuego", "Manipulación del agua/suelo", "Manipulación de humanos y monstruos", "Hablar con animales", "Visión nocturna", "Olfato agudo", "Transparencia", "Elasticidad", "Inteligencia", "Canto", "Baile", "Actuación", "Interpretación musical", "Cocinar", "Alucinación", "Maldición", "Hechizo ofensivo", "Hechizo defensivo", "Hechizo curativo", "Hechizo de invocación", "Rayo", "Barrera", "Poder sobrenatural", "Telepatía", "Telequinesis", "Clarividencia", "Teletransportación", "Segunda visión"],
+        motivacion: ["Destino", "Venganza", "Sentido existencial", "Riqueza", "Órdenes", "Poder", "Libertad", "Aburrimiento", "Una promesa", "Supervivencia", "Religión", "Justicia", "Progreso", "Evolución", "Xenofobia"],
+        comportamiento: ["Enojado", "Llorón", "Asustado", "Sombrío", "Alegre", "Optimista", "Caprichoso", "Tímido", "Arrogante", "Solitario", "Apresurado", "Relajado", "Retraído", "Diabólico", "Bondadoso", "Malintencionado", "Serio", "Frío", "Delicado", "Nervioso", "Egoísta", "Arbitrario", "Insolente", "Egocéntrico", "Brusco", "Feroz", "Lujurioso", "Honesto", "Deshonesto", "Astuto", "Valiente", "Flexible", "Puro", "Desinhibido", "Amable", "Estricto", "Humanista", "Histérico", "Difícil", "Frívolo", "Narcisista", "Sádico", "Masoquista", "Romántico", "Coqueto"],
+        habitat: ["Montaña", "Bosque", "Cueva", "Desierto", "Río", "Lago", "Cañón", "Océano", "Iceberg", "Ciudad", "Subterráneo", "Mundo espiritual", "Cielo", "Infierno", "Interior de un recipiente", "Lámpara", "Gema", "Bola de cristal", "Espejo", "Interior de una muñeca", "Maquinaria", "Sueño", "Mente", "Casa", "Techo", "Armario", "Cajón", "Nave", "Ciudad flotante", "Torre", "Ciudad puente", "Ciudad árbol", "Ciudad nube", "Granja", "Invernadero", "Globo aerostático", "Dirigible"],
+        posicion: ["Defensor de la justicia", "Mente maestra malvada", "Líder", "Seguidor", "Maestro", "Discípulo", "Viajero", "Mascota", "Presidente", "Empleado", "Secretario", "Comerciante", "Gerente", "Cuidador"],
+        vestimenta: ["Traje folclórico", "Uniforme", "Vestido", "Esmoquin", "Traje", "Leotardo", "Armadura", "Traje espacial", "Ropa de campesino", "Túnica", "Capa"],
+        calzado: ["Máscara", "Parche ocular", "Cofia", "Sombrero", "Armadura", "Capa", "Guante", "Zapato", "Piel", "Gafas", "Medias"],
+        ornamento: ["Corona", "Cuello", "Pulsera", "Anillo", "Piercing de nariz", "Tobillera", "Arete/piercing", "Collar", "Joya", "Cinta", "Herida", "Calavera"],
+        maquillaje: ["Labial", "Sombra de ojos", "Máscara de pestañas", "Manicura", "Tatuaje", "Líneas faciales", "Runas", "Marca de nacimiento"],
+        envoltura: ["Vendaje", "Yeso", "Extremidad artificial", "Chal", "Bufanda", "Cuerda", "Cadena", "Turbante", "Bandana", "Cinta", "Simbionte", "Elemento orgánico"],
+        objeto: ["Escudo", "Sable", "Espada", "Cuchillo", "Arco", "Lanza", "Pistola", "Cuerda", "Hacha", "Bomba", "Catana", "Acordeón", "Flauta", "Ocarina", "Armónica", "Jeringa", "Estetoscopio", "Bisturí", "Historia clínica", "Medicamento", "Muleta", "Lápiz", "Borrador", "Regla", "Compás", "Grapadora", "Muñeca", "Cartas", "Kit de magia", "Neceser", "Lápiz labial", "Cetro", "Bastón", "Talismán", "Libro", "Sartén", "Olla", "Plato", "Tenedor", "Cigarrillo", "Paraguas", "Bolso", "Teléfono celular", "Consola", "Botella de licor", "Llave inglesa", "Llave maestra"]
+    };
+
+    // Arrays para Morfología
+    const matrizTipos = ["Ser humano", "Muñeco / Muñeca", "Mamífero", "Ave / Ave de corral", "Reptil", "Anfibio", "Pez / Pescado", "Insecto", "Planta", "Máquina", "Edificio / Construcción", "Herramienta", "Otros elementos"];
+    const matrizPartes = ["Cuerno / Asta", "Oreja", "Ojo", "Colmillo", "Lengua", "Alas", "Cola", "Garra", "Piel", "Tijeras"];
+
+    // Variables globales para guardar las selecciones de Morfología
+    let m_tipo1 = "N/A", m_tipo2 = "N/A";
+    let m_parte_origen = "N/A", m_parte_item = "N/A";
+
+    // Llenar selects al cargar
+    window.onload = () => {
+        for (const [id, opciones] of Object.entries(listas)) {
+            const select = document.getElementById(id);
+            if(select) {
+                // Añadir opción por defecto
+                const defOpt = document.createElement("option");
+                defOpt.value = "";
+                defOpt.text = "-- Seleccionar --";
+                select.appendChild(defOpt);
+
+                opciones.forEach(opt => {
+                    const option = document.createElement("option");
+                    option.value = opt;
+                    option.text = opt;
+                    select.appendChild(option);
+                });
+            }
+        }
+        checkInstitucion();
+    };
+
+    // Tabs logic
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // Funciones Aleatorias
+    function randomSelect(id) {
+        const select = document.getElementById(id);
+        const options = select.options;
+        // Ignora el índice 0 que es "-- Seleccionar --" (a menos que sea el de género que no tiene placeholder)
+        let startIndex = (options[0].value === "") ? 1 : 0; 
+        const randomIdx = Math.floor(Math.random() * (options.length - startIndex)) + startIndex;
+        select.selectedIndex = randomIdx;
+    }
+
+    function checkInstitucion() {
+        const gen = document.getElementById("genero").value;
+        const funcSelect = document.getElementById("funcion_principal");
+        
+        // Habilitar/Deshabilitar "La Institución opresora"
+        Array.from(funcSelect.options).forEach(opt => {
+            if(opt.value === "La Institución opresora") {
+                opt.disabled = (gen !== "Entidad Colectiva");
+                if(opt.disabled && funcSelect.value === "La Institución opresora") {
+                    funcSelect.value = ""; // Resetear si es inválido
+                }
+            }
+        });
+    }
+
+    function randomSelectFunc() {
+        const funcSelect = document.getElementById("funcion_principal");
+        const validOptions = Array.from(funcSelect.options).filter(opt => !opt.disabled && opt.value !== "");
+        if(validOptions.length > 0) {
+            const randOpt = validOptions[Math.floor(Math.random() * validOptions.length)];
+            funcSelect.value = randOpt.value;
+        }
+    }
+
+    // Matrices de Morfología
+    function rollTipoVsTipo() {
+        let t1 = Math.floor(Math.random() * matrizTipos.length);
+        let t2 = Math.floor(Math.random() * matrizTipos.length);
+        while(t1 === t2) { // Evitar que se crucen iguales
+            t2 = Math.floor(Math.random() * matrizTipos.length);
+        }
+        m_tipo1 = matrizTipos[t1];
+        m_tipo2 = matrizTipos[t2];
+        document.getElementById('res-tipo-tipo').innerText = `${m_tipo1} combinada con ${m_tipo2}`;
+    }
+
+    function rollTipoVsParte() {
+        let t = Math.floor(Math.random() * matrizTipos.length);
+        let p = Math.floor(Math.random() * matrizPartes.length);
+        
+        m_parte_origen = matrizTipos[t];
+        m_parte_item = matrizPartes[p];
+        document.getElementById('res-tipo-parte').innerText = `De ${m_parte_origen} tiene ${m_parte_item}`;
+    }
+
+    // Generar Prompt Final (Requerimiento 24)
+    function generarPrompt() {
+        const getValue = (id) => document.getElementById(id).value || "[No especificado]";
+        
+        // Si no han tirado los dados de morfología, sugerir que lo hagan o poner N/A
+        if(m_tipo1 === "N/A") rollTipoVsTipo();
+        if(m_parte_origen === "N/A") rollTipoVsParte();
+
+        const nombre = document.getElementById("nombre").value || "Desconocido";
+        
+        // Reemplazo exacto del texto solicitado
+        const promptTemplate = `Crea una ficha de personaje ${getValue('genero')} cuyo nombre es ${nombre}. Este personaje vive en un mundo de género Solarpunk. Ten en cuenta todos los elementos que te mencionaré a continuación para la creación de la ficha de personaje. Su cuerpo es una mezcla de ${m_tipo1} combinada con ${m_tipo2}. De ${m_parte_origen} tiene ${m_parte_item}. Por parte de su indumentaria ${getValue('vestimenta')}. El calzado es ${getValue('calzado')}, el ornamento sería ${getValue('ornamento')}. Maquillaje: ${getValue('maquillaje')}. Envoltura: ${getValue('envoltura')}. Objeto: ${getValue('objeto')}. Su hexágono de personalidad es: atributos especiales: ${getValue('habilidades')}. Comportamiento: ${getValue('comportamiento')}. Estatus: ${getValue('estatus')}. Profesión: ${getValue('profesión')}. Posición: ${getValue('posicion')}. Hábitat: ${getValue('habitat')}. Debilidades ${getValue('debilidades')}. Rasgos ${getValue('rasgos')}. Motivación/Deseo ${getValue('motivacion')}. Tener en cuenta la clase ${getValue('clase')}, la función principal ${getValue('funcion_principal')}, la raza ${getValue('raza')}.`;
+
+        const txtArea = document.getElementById("prompt-output");
+        txtArea.value = promptTemplate;
+        
+        document.getElementById("prompt-section").style.display = "block";
+
+        // Scroll suave hasta el prompt
+        document.getElementById("prompt-section").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copiarPrompt() {
+        const txtArea = document.getElementById("prompt-output");
+        txtArea.select();
+        txtArea.setSelectionRange(0, 99999); // Para dispositivos móviles
+        navigator.clipboard.writeText(txtArea.value)
+            .then(() => alert("¡Prompt copiado al portapapeles!"))
+            .catch(err => alert("Error al copiar: " + err));
+    }
+</script>
+
+</body>
+</html>
