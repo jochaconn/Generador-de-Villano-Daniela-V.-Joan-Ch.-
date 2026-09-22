@@ -549,9 +549,13 @@
         document.getElementById('res-tipo-parte').innerText = `De ${m_parte_origen} tiene ${m_parte_item}`;
     }
 
-    // Generar Prompt Final (Requerimiento 24)
+   // Generar Prompt Final (Requerimiento 24)
     function generarPrompt() {
-        const getValue = (id) => document.getElementById(id).value || "[No especificado]";
+        // Validación de seguridad añadida para evitar errores si un ID no coincide
+        const getValue = (id) => {
+            const elemento = document.getElementById(id);
+            return (elemento && elemento.value) ? elemento.value : "[No especificado]";
+        };
         
         // Si no han tirado los dados de morfología, sugerir que lo hagan o poner N/A
         if(m_tipo1 === "N/A") rollTipoVsTipo();
@@ -559,8 +563,8 @@
 
         const nombre = document.getElementById("nombre").value || "Desconocido";
         
-        // Reemplazo exacto del texto solicitado
-        const promptTemplate = `Crea una ficha de personaje ${getValue('genero')} cuyo nombre es ${nombre}. Este personaje vive en un mundo de género Solarpunk. Ten en cuenta todos los elementos que te mencionaré a continuación para la creación de la ficha de personaje. Su cuerpo es una mezcla de ${m_tipo1} combinada con ${m_tipo2}. De ${m_parte_origen} tiene ${m_parte_item}. Por parte de su indumentaria ${getValue('vestimenta')}. El calzado es ${getValue('calzado')}, el ornamento sería ${getValue('ornamento')}. Maquillaje: ${getValue('maquillaje')}. Envoltura: ${getValue('envoltura')}. Objeto: ${getValue('objeto')}. Su hexágono de personalidad es: atributos especiales: ${getValue('habilidades')}. Comportamiento: ${getValue('comportamiento')}. Estatus: ${getValue('estatus')}. Profesión: ${getValue('profesión')}. Posición: ${getValue('posicion')}. Hábitat: ${getValue('habitat')}. Debilidades ${getValue('debilidades')}. Rasgos ${getValue('rasgos')}. Motivación/Deseo ${getValue('motivacion')}. Tener en cuenta la clase ${getValue('clase')}, la función principal ${getValue('funcion_principal')}, la raza ${getValue('raza')}.`;
+        // Corrección: Se cambió 'profesión' por 'profesion' (sin tilde) para coincidir con el ID del HTML
+        const promptTemplate = `Crea una ficha de personaje ${getValue('genero')} cuyo nombre es ${nombre}. Este personaje vive en un mundo de género Solarpunk. Ten en cuenta todos los elementos que te mencionaré a continuación para la creación de la ficha de personaje. Su cuerpo es una mezcla de ${m_tipo1} combinada con ${m_tipo2}. De ${m_parte_origen} tiene ${m_parte_item}. Por parte de su indumentaria ${getValue('vestimenta')}. El calzado es ${getValue('calzado')}, el ornamento sería ${getValue('ornamento')}. Maquillaje: ${getValue('maquillaje')}. Envoltura: ${getValue('envoltura')}. Objeto: ${getValue('objeto')}. Su hexágono de personalidad es: atributos especiales: ${getValue('habilidades')}. Comportamiento: ${getValue('comportamiento')}. Estatus: ${getValue('estatus')}. Profesión: ${getValue('profesion')}. Posición: ${getValue('posicion')}. Hábitat: ${getValue('habitat')}. Debilidades ${getValue('debilidades')}. Rasgos ${getValue('rasgos')}. Motivación/Deseo ${getValue('motivacion')}. Tener en cuenta la clase ${getValue('clase')}, la función principal ${getValue('funcion_principal')}, la raza ${getValue('raza')}.`;
 
         const txtArea = document.getElementById("prompt-output");
         txtArea.value = promptTemplate;
